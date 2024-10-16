@@ -18,7 +18,8 @@ const db = mysql.createConnection({
   ssl: {
     rejectUnauthorized: true,
     ca: fs.readFileSync(__dirname + '/ca.pem')
-  }
+  },
+  connectTimeout: 20000
 });
 
 db.connect((err) => {
