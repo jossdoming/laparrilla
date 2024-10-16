@@ -16,8 +16,8 @@ const db = mysql.createConnection({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   ssl: {
-    rejectUnauthorized: true,
-    ca: fs.readFileSync('./ca.pem') // Asegúrate de tener el certificado descargado desde Aiven
+    rejectUnauthorized: false,
+    ca: fs.readFileSync(__dirname + '/ca.pem')
   }
 });
 
