@@ -1,7 +1,9 @@
+
 const mysql = require('mysql2');
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
+const fs = require('fs');
 
 const app = express();
 app.use(cors());
@@ -12,7 +14,11 @@ const db = mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME
+  database: process.env.DB_NAME,
+  ssl: {
+    rejectUnauthorized: true,
+    ca: fs.readFileSync('./ca.pem') // Asegúrate de tener el certificado descargado desde Aiven
+  }
 });
 
 db.connect((err) => {
