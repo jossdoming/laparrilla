@@ -133,11 +133,11 @@ app.post('/agregar-venta', (req, res) => {
   const isv = subtotal * 0.15;
   const total = subtotal + isv;
 
-  // Consulta SQL para insertar la venta, incluyendo cantidad y precioUnitario
-  const query = `INSERT INTO ventas (platillo, tipoPedido, nombreCliente, rtn, direccion, cantidad, precioUnitario, fecha) 
-                 VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`;
+  // Consulta SQL para insertar la venta, incluyendo subtotal, isv y total
+  const query = `INSERT INTO ventas (platillo, tipoPedido, nombreCliente, rtn, direccion, cantidad, precioUnitario, subtotal, isv, total, fecha) 
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`;
 
-  db.query(query, [platillo, tipoPedido, nombreCliente, rtn, direccion, cantidad, precioUnitario], (error, results) => {
+  db.query(query, [platillo, tipoPedido, nombreCliente, rtn, direccion, cantidad, precioUnitario, subtotal, isv, total], (error, results) => {
       if (error) {
           console.error('Error al agregar la venta:', error); // Loguear el error
           return res.status(500).send('Error al agregar la venta');
@@ -148,7 +148,7 @@ app.post('/agregar-venta', (req, res) => {
 
 
 // Iniciar el servidor
-const PORT = process.env.PORT || 5000;
+const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`Servidor ejecutándose en el puerto ${PORT}`);
 });
