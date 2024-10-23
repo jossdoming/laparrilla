@@ -3,7 +3,7 @@ const mysql = require('mysql2');
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
-const fs = require('fs');
+
 
 const app = express();
 app.use(cors());
@@ -15,11 +15,7 @@ const db = mysql.createConnection({
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  ssl: {
-    rejectUnauthorized: true,
-    ca: fs.readFileSync(__dirname + '/ca.pem')
-  },
-  connectTimeout: 20000
+  
 });
 
 db.connect((err) => {
