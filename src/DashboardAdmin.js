@@ -37,7 +37,7 @@ const DashboardAdmin = () => {
     const fetchPlatillos = async () => {
         setLoading(true);
         try {
-            const response = await axios.get('http://localhost:5000/platillos');
+            const response = await axios.get('http://sql5.freesqldatabase.com:3306/platillos');
             setPlatillos(response.data);
             toastr.success('Platillos cargados con éxito');
         } catch (error) {
@@ -52,7 +52,7 @@ const DashboardAdmin = () => {
     const fetchVentas = async () => {
         setLoading(true);
         try {
-            const response = await axios.get('http://localhost:5000/ventas');
+            const response = await axios.get('http://sql5.freesqldatabase.com:3306/ventas');
             setVentas(response.data);
             toastr.success('Ventas cargadas con éxito');
         } catch (error) {
@@ -73,7 +73,7 @@ const DashboardAdmin = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            await axios.post('http://localhost:5000/agregar-platillo', {
+            await axios.post('http://sql5.freesqldatabase.com:3306/agregar-platillo', {
                 nombre,
                 descripcion,
                 precio,
@@ -98,7 +98,7 @@ const DashboardAdmin = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            await axios.put(`http://localhost:5000/editar-platillo/${platilloEditado.id}`, {
+            await axios.put(`http://sql5.freesqldatabase.com:3306/editar-platillo/${platilloEditado.id}`, {
                 nombre,
                 descripcion,
                 precio,
@@ -122,7 +122,7 @@ const DashboardAdmin = () => {
         setLoading(true);
         try {
             await Promise.all(platillosEliminar.map(async (platilloId) => {
-                await axios.delete(`http://localhost:5000/eliminar-platillo/${platilloId}`);
+                await axios.delete(`http://sql5.freesqldatabase.com:3306/eliminar-platillo/${platilloId}`);
             }));
             fetchPlatillos();
             setPlatillosEliminar([]);
