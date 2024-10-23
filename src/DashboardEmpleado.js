@@ -32,7 +32,7 @@ const DashboardEmpleado = () => {
     // Obtener platillos al cargar el componente
     const fetchPlatillos = async () => {
         try {
-            const response = await axios.get('http://localhost:5000/platillos');
+            const response = await axios.get('http://sql5.freesqldatabase.com:3306/platillos');
             setPlatillos(response.data);
         } catch (error) {
             console.error('Error al obtener los platillos:', error);
@@ -42,7 +42,7 @@ const DashboardEmpleado = () => {
     // Obtener ventas al cargar el componente
     const fetchVentas = async () => {
         try {
-            const response = await axios.get('http://localhost:5000/ventas');
+            const response = await axios.get('http://sql5.freesqldatabase.com:3306/ventas');
             setVentas(response.data);
         } catch (error) {
             console.error('Error al obtener las ventas:', error);
@@ -79,7 +79,7 @@ const DashboardEmpleado = () => {
         e.preventDefault();
         setIsLoading(true); // Iniciar la carga
         try {
-            await axios.post('http://localhost:5000/agregar-venta', {
+            await axios.post('http://sql5.freesqldatabase.com:3306/agregar-venta', {
                 platillo: platilloSeleccionado,
                 cantidad,
                 precioUnitario,
