@@ -16,6 +16,7 @@ const db = mysql.createConnection({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   
+  
 });
 
 db.connect((err) => {
@@ -144,7 +145,7 @@ app.post('/agregar-venta', (req, res) => {
 
 
 // Iniciar el servidor
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Servidor ejecutándose en el puerto ${PORT}`);
 });
