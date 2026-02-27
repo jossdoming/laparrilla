@@ -1,5 +1,5 @@
 
-const mysql = require('mysql2');
+const { Pool } = require('pg');
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
@@ -9,47 +9,51 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Configuración de la base de datos
-const db = mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: 3306
-  
-  
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
-db.connect((err) => {
-  if (err) throw err;
-  console.log('Conectado a la base de datos MySQL');
-});
+pool.connect()
+  .then(() => console.log('Conectado a PostgreSQL'))
+  .catch(err => {
+    console.error('Error de conexión', err);
+    process.exit(1);
+  });
 
 // Ruta de prueba
 app.get('/', (req, res) => {
   res.send('¡API del Sistema de Facturación!');
 });
 
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
   const { nombre, password } = req.body;
 
-  // Busca al usuario en la base de datos
-  db.query('SELECT * FROM usuarios WHERE nombre = ?', [nombre], (error, results) => {
-    if (error) return res.status(500).send('Error en la base de datos');
-    if (results.length === 0) return res.status(400).send('Usuario no encontrado');
+  try {
+    const result = await pool.query(
+      'SELECT * FROM usuarios WHERE nombre = $1',
+      [nombre]
+    );
 
-    const usuario = results[0];
+    if (result.rows.length === 0)
+      return res.status(400).send('Usuario no encontrado');
 
-    // Compara la contraseña directamente (sin encriptación)
-    if (password !== usuario.password) return res.status(400).send('Contraseña incorrecta');
+    const usuario = result.rows[0];
 
-    // Devuelve el usuario y su rol en la respuesta
+    if (password !== usuario.password)
+      return res.status(400).send('Contraseña incorrecta');
+
     res.json({
       message: 'Inicio de sesión exitoso',
-      token: 'dummy-token', // Aquí deberías generar un token real si lo necesitas
-      rol: usuario.rol // Enviar el rol del usuario
+      token: 'dummy-token',
+      rol: usuario.rol
     });
-  });
+
+  } catch (error) {
+    res.status(500).send('Error en la base de datos');
+  }
 });
 // Función para agregar un nuevo usuario (sin encriptar la contraseña)
 const addUser = (nombre, password, rol) => {
@@ -66,28 +70,29 @@ const addUser = (nombre, password, rol) => {
 // Llama a esta función para agregar el usuario
 // addUser('empleado', 'laparrilla', 'empleado');
 
-// Obtener todos los platillos
-app.get('/platillos', (req, res) => {
-  db.query('SELECT * FROM platillos', (err, results) => {
-      if (err) {
-          return res.status(500).send('Error al obtener platillos');
-      }
-      res.json(results);
-  });
+app.get('/platillos', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM platillos');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).send('Error al obtener platillos');
+  }
 });
 
-// Agregar un nuevo platillo
-app.post('/agregar-platillo', (req, res) => {
+app.post('/agregar-platillo', async (req, res) => {
   const { nombre, descripcion, precio, foto } = req.body;
-  const query = 'INSERT INTO platillos (nombre, descripcion, precio, foto) VALUES (?, ?, ?, ?)';
-  db.query(query, [nombre, descripcion, precio, foto], (err, results) => {
-      if (err) {
-          return res.status(500).send('Error al agregar el platillo');
-      }
-      res.status(201).send('Platillo agregado con éxito');
-  });
-});
 
+  try {
+    await pool.query(
+      'INSERT INTO platillos (nombre, descripcion, precio, foto) VALUES ($1, $2, $3, $4)',
+      [nombre, descripcion, precio, foto]
+    );
+
+    res.status(201).send('Platillo agregado con éxito');
+  } catch (err) {
+    res.status(500).send('Error al agregar el platillo');
+  }
+});
 // Editar un platillo existente
 app.put('/editar-platillo/:id', (req, res) => {
   const { id } = req.params;
@@ -123,28 +128,28 @@ app.get('/ventas', (req, res) => {
   });
 });
 
-app.post('/agregar-venta', (req, res) => {
+app.post('/agregar-venta', async (req, res) => {
   const { platillo, tipoPedido, nombreCliente, rtn, direccion, cantidad, precioUnitario } = req.body;
 
-  // Calcular subtotal, ISV (15%) y total
   const subtotal = cantidad * precioUnitario;
   const isv = subtotal * 0.15;
   const total = subtotal + isv;
 
-  // Consulta SQL para insertar la venta, incluyendo subtotal, isv y total
-  const query = `INSERT INTO ventas (platillo, tipoPedido, nombreCliente, rtn, direccion, cantidad, precioUnitario, subtotal, isv, total, fecha) 
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`;
+  try {
+    await pool.query(
+      `INSERT INTO ventas 
+       (platillo, tipopedido, nombrecliente, rtn, direccion, cantidad, preciounitario, subtotal, isv, total, fecha)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,NOW())`,
+      [platillo, tipoPedido, nombreCliente, rtn, direccion, cantidad, precioUnitario, subtotal, isv, total]
+    );
 
-  db.query(query, [platillo, tipoPedido, nombreCliente, rtn, direccion, cantidad, precioUnitario, subtotal, isv, total], (error, results) => {
-      if (error) {
-          console.error('Error al agregar la venta:', error); // Loguear el error
-          return res.status(500).send('Error al agregar la venta');
-      }
-      res.status(200).send('Venta agregada correctamente');
-  });
+    res.status(200).send('Venta agregada correctamente');
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error al agregar la venta');
+  }
 });
-
-
 // Iniciar el servidor
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
