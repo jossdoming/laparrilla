@@ -94,40 +94,43 @@ app.post('/agregar-platillo', async (req, res) => {
   }
 });
 // Editar un platillo existente
-app.put('/editar-platillo/:id', (req, res) => {
+app.put('/editar-platillo/:id', async (req, res) => {
   const { id } = req.params;
   const { nombre, descripcion, precio, foto } = req.body;
-  const query = 'UPDATE platillos SET nombre = ?, descripcion = ?, precio = ?, foto = ? WHERE id = ?';
-  db.query(query, [nombre, descripcion, precio, foto, id], (err, results) => {
-      if (err) {
-          return res.status(500).send('Error al editar el platillo');
-      }
-      res.send('Platillo editado con éxito');
-  });
+
+  try {
+    await pool.query(
+      'UPDATE platillos SET nombre=$1, descripcion=$2, precio=$3, foto=$4 WHERE id=$5',
+      [nombre, descripcion, precio, foto, id]
+    );
+
+    res.send('Platillo editado con éxito');
+  } catch (err) {
+    res.status(500).send('Error al editar el platillo');
+  }
 });
 
 // Eliminar un platillo
-app.delete('/eliminar-platillo/:id', (req, res) => {
+app.delete('/eliminar-platillo/:id', async (req, res) => {
   const { id } = req.params;
-  const query = 'DELETE FROM platillos WHERE id = ?';
-  db.query(query, [id], (err, results) => {
-      if (err) {
-          return res.status(500).send('Error al eliminar el platillo');
-      }
-      res.send('Platillo eliminado con éxito');
-  });
+
+  try {
+    await pool.query('DELETE FROM platillos WHERE id=$1', [id]);
+    res.send('Platillo eliminado con éxito');
+  } catch (err) {
+    res.status(500).send('Error al eliminar el platillo');
+  }
 });
 
 // Obtener todas las ventas
-app.get('/ventas', (req, res) => {
-  db.query('SELECT * FROM ventas', (err, results) => {
-    if (err) {
-      return res.status(500).send('Error al obtener ventas');
-    }
-    res.json(results);
-  });
+app.get('/ventas', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM ventas');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).send('Error al obtener ventas');
+  }
 });
-
 app.post('/agregar-venta', async (req, res) => {
   const { platillo, tipoPedido, nombreCliente, rtn, direccion, cantidad, precioUnitario } = req.body;
 
