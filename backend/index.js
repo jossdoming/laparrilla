@@ -16,13 +16,13 @@ const pool = new Pool({
   }
 });
 
-pool.connect()
+pool.query('SELECT NOW()')
   .then(() => console.log('Conectado a PostgreSQL'))
   .catch(err => {
     console.error('Error de conexión', err);
     process.exit(1);
   });
-
+  
 // Ruta de prueba
 app.get('/', (req, res) => {
   res.send('¡API del Sistema de Facturación!');
@@ -56,15 +56,17 @@ app.post('/login', async (req, res) => {
   }
 });
 // Función para agregar un nuevo usuario (sin encriptar la contraseña)
-const addUser = (nombre, password, rol) => {
-  db.query(
-    'INSERT INTO usuarios (nombre, password, rol) VALUES (?, ?, ?)',
-    [nombre, password, rol],
-    (error, result) => {
-      if (error) return console.error('Error al agregar usuario:', error.message);
-      console.log('Usuario agregado con ID:', result.insertId);
-    }
-  );
+const addUser = async (nombre, password, rol) => {
+  try {
+    const result = await pool.query(
+      'INSERT INTO usuarios (nombre, password, rol) VALUES ($1, $2, $3) RETURNING id',
+      [nombre, password, rol]
+    );
+
+    console.log('Usuario agregado con ID:', result.rows[0].id);
+  } catch (error) {
+    console.error('Error al agregar usuario:', error.message);
+  }
 };
 
 // Llama a esta función para agregar el usuario
