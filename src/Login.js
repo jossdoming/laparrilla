@@ -39,6 +39,23 @@ const Login = () => {
       {/* Efecto blur overlay */}
       <div className="absolute inset-0 backdrop-blur-2xl"></div>
 
+{/* Partículas */}
+<div className="absolute inset-0 overflow-hidden">
+  {[...Array(25)].map((_, i) => (
+    <span
+      key={i}
+      className="particle"
+      style={{
+        left: `${Math.random() * 100}%`,
+        animationDuration: `${6 + Math.random() * 10}s`,
+        animationDelay: `${Math.random() * 5}s`,
+        width: `${2 + Math.random() * 3}px`,
+        height: `${2 + Math.random() * 3}px`,
+      }}
+    />
+  ))}
+</div>
+
       {/* Card */}
       <div className="relative w-full max-w-md p-8 rounded-2xl bg-white/5 border border-white/10 shadow-2xl backdrop-blur-xl">
 
