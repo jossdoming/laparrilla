@@ -121,18 +121,46 @@ const Login = () => {
       </div>
 
       {/* Animación custom */}
-      <style>
-        {`
-          @keyframes gradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-          }
-          .animate-gradient {
-            animation: gradient 12s ease infinite;
-          }
-        `}
-      </style>
+     <style>
+  {`
+    @keyframes gradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .animate-gradient {
+      animation: gradient 12s ease infinite;
+    }
+
+    /* Partículas */
+    .particle {
+      position: absolute;
+      bottom: -10px;
+      border-radius: 50%;
+      opacity: 0;
+      animation: floatUp linear infinite;
+      box-shadow: 0 0 6px rgba(59,130,246,0.8);
+    }
+
+    @keyframes floatUp {
+      0% {
+        transform: translateY(0) scale(1);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      50% {
+        transform: translateY(-50vh) scale(1.2);
+      }
+      100% {
+        transform: translateY(-100vh) scale(0.8);
+        opacity: 0;
+      }
+    }
+  `}
+</style>
     </div>
   );
 };
