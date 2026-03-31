@@ -1,82 +1,109 @@
 import React, { useState } from 'react';
 import api from './services/api';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from './AuthContext'; // Importa el contexto
+import { useAuth } from './AuthContext';
 import { FaUserAlt, FaLock } from 'react-icons/fa';
 
 const Login = () => {
   const [nombre, setNombre] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { setUser } = useAuth(); // Obtén el método para establecer el usuario
+  const { setUser } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     try {
       const response = await api.post('/login', { nombre, password });
-      
+
       const { token, rol } = response.data;
       localStorage.setItem('token', token);
 
-      setUser({ nombre, rol }); // Establece el usuario en el contexto
+      setUser({ nombre, rol });
 
       if (rol === 'administrador') {
         navigate('/dashboard');
       } else if (rol === 'empleado') {
         navigate('/dashboardempleado');
       } else {
-        alert('Rol no reconocido');
+        setError('Rol no reconocido');
       }
-      
+
     } catch (error) {
       console.error(error);
-      alert('Error en el inicio de sesión.');
+      setError('Credenciales incorrectas o error del servidor');
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <form onSubmit={handleSubmit} className="bg-white p-8 rounded shadow-md w-full max-w-sm">
-        <h2 className="text-3xl font-bold mb-6 text-center text-blue-600">Hola Eber</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
+      
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 border border-gray-200">
         
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Nombre:</label>
-          <div className="flex items-center border rounded w-full py-2 px-3">
-            <FaUserAlt className="text-gray-400 mr-2" />
-            <input 
-              type="text" 
-              value={nombre} 
-              onChange={(e) => setNombre(e.target.value)} 
-              required 
-              className="w-full outline-none" 
-              placeholder="Ingrese su nombre"
-            />
-          </div>
-        </div>
+        <h2 className="text-2xl font-semibold text-gray-800 text-center mb-2">
+          Iniciar sesión
+        </h2>
+        <p className="text-sm text-gray-500 text-center mb-6">
+          Accede a tu panel administrativo
+        </p>
 
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Contraseña:</label>
-          <div className="flex items-center border rounded w-full py-2 px-3">
-            <FaLock className="text-gray-400 mr-2" />
-            <input 
-              type="password" 
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
-              required 
-              className="w-full outline-none" 
-              placeholder="Ingrese su contraseña"
-            />
+        {error && (
+          <div className="mb-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded p-2 text-center">
+            {error}
           </div>
-        </div>
+        )}
 
-        <button 
-          type="submit" 
-          className="w-full bg-blue-600 text-white rounded py-2 px-4 hover:bg-blue-700 transition duration-200 flex items-center justify-center"
-        >
-          <FaLock className="mr-2" />
-          Iniciar Sesión
-        </button>
-      </form>
+        <form onSubmit={handleSubmit}>
+          
+          {/* Usuario */}
+          <div className="mb-4">
+            <label className="text-sm text-gray-600 block mb-1">Usuario</label>
+            <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-blue-500">
+              <FaUserAlt className="text-gray-400 mr-2" />
+              <input
+                type="text"
+                value={nombre}
+                onChange={(e) => setNombre(e.target.value)}
+                required
+                placeholder="Ingrese su usuario"
+                className="w-full outline-none text-sm"
+              />
+            </div>
+          </div>
+
+          {/* Password */}
+          <div className="mb-6">
+            <label className="text-sm text-gray-600 block mb-1">Contraseña</label>
+            <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-blue-500">
+              <FaLock className="text-gray-400 mr-2" />
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                placeholder="Ingrese su contraseña"
+                className="w-full outline-none text-sm"
+              />
+            </div>
+          </div>
+
+          {/* Botón */}
+          <button
+            type="submit"
+            className="w-full bg-slate-800 text-white py-2 rounded-lg hover:bg-slate-900 transition duration-200 font-medium"
+          >
+            Ingresar
+          </button>
+
+        </form>
+
+        {/* Footer */}
+        <p className="text-xs text-gray-400 text-center mt-6">
+          © {new Date().getFullYear()} Sistema Corporativo
+        </p>
+
+      </div>
     </div>
   );
 };
